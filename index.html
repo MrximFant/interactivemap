@@ -1,18 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Coordinate Plot with Hover</title>
+  <title>Coordinate Plot with List and Hover</title>
   <style>
     #container {
       position: relative;
       width: 2560px;
       height: 2022px;
+      display: flex; /* Use flexbox for layout */
+    }
+
+    #coordinateListContainer {
+      width: 300px; /* Adjust as needed */
+      height: 100%;
+      overflow-y: scroll; /* Add vertical scroll */
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    #coordinateList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #coordinateList li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
     }
 
     #coordinateCanvas {
       position: absolute;
       top: 0;
-      left: 0;
+      left: 300px; /* Shift canvas to the right */
       width: 2560px;
       height: 2022px;
       cursor: crosshair;
@@ -21,7 +41,7 @@
     #backgroundImage {
       position: absolute;
       top: 0;
-      left: 0;
+      left: 300px; /* Shift image to the right */
       width: 100%;
       height: 100%;
       object-fit: none;
@@ -41,6 +61,11 @@
 <body>
 
   <div id="container">
+    <div id="coordinateListContainer">
+      <h3>Coordinates</h3>
+      <ul id="coordinateList"></ul>
+    </div>
+
     <img id="backgroundImage" src="MAP_S2.jpg" alt="Background">
     <canvas id="coordinateCanvas" width="2560" height="2022"></canvas>
     <div id="tooltip" class="tooltip"></div>
@@ -51,9 +76,11 @@
     const ctx = canvas.getContext('2d');
     const background = document.getElementById('backgroundImage');
     const tooltip = document.getElementById('tooltip');
+    const coordinateList = document.getElementById('coordinateList');
 
     // Wait for the image to load
     background.onload = function() {
+
 
       // Your Coordinates (Replace this with your full dataset)
       const coordinates = [
@@ -733,7 +760,7 @@
         { x: 999, y: 121 }
       ];
 
-      // Image and Coordinate System Information
+     // Image and Coordinate System Information
       const imageWidth = 2560;
       const imageHeight = 2022;
       const coordSystemWidth = 1000;
@@ -751,7 +778,7 @@
       ctx.fillStyle = 'red';
       const pointRadius = 5; // Size of the dots
 
-      // Plot the coordinates on the canvas
+      // Plot the coordinates on the canvas AND build the list
       coordinates.forEach(coord => {
         const x = coord.x * scaleX + offsetX;
         const y = canvas.height - (coord.y * scaleY + offsetY); // Flip Y
@@ -763,6 +790,11 @@
         // Store the scaled coordinates back in the coordinate object for hover calculations
         coord.scaledX = x;
         coord.scaledY = y;
+
+        // Create list item for the coordinates
+        const listItem = document.createElement('li');
+        listItem.textContent = `X: ${coord.x}, Y: ${coord.y}`;
+        coordinateList.appendChild(listItem);
       });
 
       // Mousemove event listener for hover effect
@@ -783,13 +815,13 @@
           }
         }
 
-       if (hoveredCoord) {
+        if (hoveredCoord) {
           // Show tooltip near the mouse
           tooltip.style.left = mouseX + 10 + 'px';
           tooltip.style.top = mouseY + 10 + 'px';
-          // ******************** This is where the coords that show up in the hover are changed********************
-          tooltip.textContent = `X: ${coord.x}, Y: ${coord.y}`;
-        tooltip.style.display = 'block';
+          // This is where the coords that show up in the hover are changed
+          tooltip.textContent = `X: ${hoveredCoord.x}, Y: ${hoveredCoord.y}`;
+          tooltip.style.display = 'block';
         } else {
           // Hide the tooltip
           tooltip.style.display = 'none';
