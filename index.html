@@ -754,7 +754,7 @@
       // Plot the coordinates on the canvas
       coordinates.forEach(coord => {
         const x = coord.x * scaleX + offsetX;
-        const y = coord.y * scaleY + offsetY;
+        const y = canvas.height - (coord.y * scaleY + offsetY); // Flip Y
 
         ctx.beginPath();
         ctx.arc(x, y, pointRadius, 0, 2 * Math.PI);
