@@ -15,7 +15,7 @@
       left: 0;
       width: 2560px;
       height: 2022px;
-      cursor: crosshair; /* Change cursor to a crosshair */
+      cursor: crosshair;
     }
 
     #backgroundImage {
@@ -33,8 +33,8 @@
       border: 1px solid black;
       padding: 5px;
       font-size: 12px;
-      display: none; /* Initially hidden */
-      pointer-events: none; /* Don't interfere with canvas events */
+      display: none;
+      pointer-events: none;
     }
   </style>
 </head>
@@ -787,10 +787,10 @@
           // Show tooltip near the mouse
           tooltip.style.left = mouseX + 10 + 'px';
           tooltip.style.top = mouseY + 10 + 'px';
-        
+          // ******************** This is where the coords that show up in the hover are changed********************
           tooltip.textContent = `X: ${coord.x}, Y: ${coord.y}`;
-          tooltip.style.display = 'block';
-       } else {
+        tooltip.style.display = 'block';
+        } else {
           // Hide the tooltip
           tooltip.style.display = 'none';
         }
