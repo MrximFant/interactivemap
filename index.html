@@ -10,6 +10,37 @@
       display: flex; /* Use flexbox for layout */
     }
 
+<style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f0f0f0; /* Optional background color for the site */
+    }
+
+    #canvas-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column; /* Stack the image and canvas */
+        padding: 20px; /* Space around the content */
+        background-color: white; /* Optional background for the canvas area */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for aesthetics */
+        border-radius: 10px; /* Optional rounded corners */
+        position: relative;
+    }
+
+    #backgroundImage, canvas {
+        max-width: calc(100% - 40px); /* Ensure scalability while considering padding */
+        max-height: calc(100% - 40px); /* Ensure scalability while considering padding */
+        object-fit: contain;
+    }
+</style>
+    
     #coordinateListContainer {
       width: 300px; /* Adjust as needed */
       height: 100%;
@@ -70,8 +101,11 @@
       <ul id="coordinateList"></ul>
     </div>
 
+<div id="canvas-wrapper">
     <img id="backgroundImage" src="MAP_S2.jpg" alt="Background">
     <canvas id="coordinateCanvas" width="2560" height="2022"></canvas>
+</div>
+
     <div id="tooltip" class="tooltip"></div>
   </div>
 
