@@ -808,16 +808,6 @@ const coordinates = [
       confirmedCoordinates = []; // Default to empty list in case of error
     }
 
-try {
-  confirmedCoordinates = JSON.parse(hiddenConfirmedListDiv.textContent.trim());
-} catch (e) {
-  console.error("Error parsing confirmed coordinates:", e);
-  console.log("Content of hiddenConfirmedListDiv:", hiddenConfirmedListDiv.textContent);
-  confirmedCoordinates = []; // Default to empty list in case of error
-}
-
-
-
     
     const confirmedCoordinatesSet = new Set(confirmedCoordinates.map(coord => JSON.stringify(coord)));
 
@@ -845,7 +835,7 @@ function reDrawCoordinates() {
 
     if (isCoordinateConfirmed(coord)) {
       ctx.fillStyle = 'green';
-      ctx.arc(x, y, pointRadius * 1.5, 0, 2 * Math.PI); // Make green circles 1.5x larger
+      ctx.arc(x, y, pointRadius * 2, 0, 2 * Math.PI); // Make green circles 1.5x larger
     } else {
       ctx.fillStyle = 'red';
       ctx.arc(x, y, pointRadius, 0, 2 * Math.PI); // Normal size for red circles
