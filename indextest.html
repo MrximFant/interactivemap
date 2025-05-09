@@ -806,6 +806,17 @@ const coordinates = [
       confirmedCoordinates = []; // Default to empty list in case of error
     }
 
+try {
+  confirmedCoordinates = JSON.parse(hiddenConfirmedListDiv.textContent.trim());
+} catch (e) {
+  console.error("Error parsing confirmed coordinates:", e);
+  console.log("Content of hiddenConfirmedListDiv:", hiddenConfirmedListDiv.textContent);
+  confirmedCoordinates = []; // Default to empty list in case of error
+}
+
+
+
+    
     const confirmedCoordinatesSet = new Set(confirmedCoordinates.map(coord => JSON.stringify(coord)));
 
     // Image and Coordinate System Information
