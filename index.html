@@ -59,6 +59,17 @@
       pointer-events: none;
     }
   </style>
+
+  <script>
+    // Detect if the current URL already includes a query string
+    if (!window.location.href.includes('?v=')) {
+        // Append a timestamp to the URL to force cache refresh
+        const timestamp = new Date().getTime();
+        const newUrl = window.location.href.split('#')[0].split('?')[0] + '?v=' + timestamp;
+        window.location.href = newUrl;
+    }
+</script>
+ 
 </head>
 <body>
   
