@@ -65,9 +65,18 @@
   
   <div id="container">
     <div id="coordinateListContainer">
-      <a href="indextest2.html" style="font-size: 15px; color: red; display: block; margin-bottom: 10px;">
-      Beta with confirmed sites
-      </a>
+      <a id="beta-link" style="font-size: 15px; color: red; display: block; margin-bottom: 10px;">
+    Beta with confirmed sites
+</a>
+
+<script>
+    // Get the link element
+    const betaLink = document.getElementById('beta-link');
+
+    // Dynamically add a timestamp to the URL
+    betaLink.href = "indextest2.html?v=" + new Date().getTime();
+</script>
+
         <h3>Coordinates</h3>
       <ul id="coordinateList"></ul>
     </div>
