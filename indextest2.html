@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Responsive Coordinate Plot with Read-Only List</title>
+  <style>
+    #container {
+      position: relative;
+      width: 100%;
+      max-width: 2560px;
+      height: auto;
+      display: flex;
+    }
+
+    #coordinateListContainer {
+      width: 300px;
+      height: 100%;
+      overflow-y: scroll;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    #coordinateList {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #coordinateList li {
+      padding: 5px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    #coordinateCanvas {
+      position: absolute;
+      top: 0;
+      left: 300px;
+      width: 100%;
+      height: auto;
+      cursor: crosshair;
+      max-width: 2560px;
+      max-height: 2022px;
+    }
+
+    #backgroundImage {
+      position: absolute;
+      top: 0;
+      left: 300px;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      max-width: 2560px;
+      max-height: 2022px;
+    }
+
+    .tooltip {
+      position: absolute;
+      background-color: white;
+      border: 1px solid black;
+      padding: 6px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="container">
+    <div id="coordinateListContainer">
+      <h3>Confirmed Coordinates</h3>
+      <ul id="coordinateList"></ul>
+    </div>
+
+    <img id="backgroundImage" src="MAP_S2.jpg" alt="Background">
+    <canvas id="coordinateCanvas"></canvas>
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- Hidden Confirmed Coordinates List -->
+    <div id="hiddenConfirmedList" style="display: none;">
+  [
+    { "x": 245, "y": 973 },
+    { "x": 147, "y": 950 },
+    { "x": 221, "y": 397 },
+    { "x": 868, "y": 972 },
+    { "x": 642, "y": 882 },
+    { "x": 37,  "y": 702 },
+    { "x": 22,  "y": 733 },
+    { "x": 104, "y": 957 },
+    { "x": 601, "y": 932 },
+    { "x": 807, "y": 93 },    
+    { "x": 412,  "y": 975 },
+    { "x": 703,  "y": 793 },
+    { "x": 577, "y": 783 }
+  ]
+</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('coordinateCanvas');
+    const ctx = canvas.getContext('2d');
+    const background = document.getElementById('backgroundImage');
+    const tooltip = document.getElementById('tooltip');
+    const coordinateList = document.getElementById('coordinateList');
+    const hiddenConfirmedListDiv = document.getElementById('hiddenConfirmedList');
+
+    // Your Coordinates to be drawn Red
+const coordinates = [
+
+    { x: 245, y: 973 },
+    { x: 147, y: 950 },
+    { x: 221, y: 397 },
+    { x: 868, y: 972 },
+    { x: 642, y: 882 },
+    { x: 37,  y: 702 },
+    { x: 22,  y: 733 },
+    { x: 104, y: 957 },
+    { x: 601, y: 932 },
+    { x: 807, y: 93 },    
+    { x: 412,  y: 975 },
+    { x: 703,  y: 793 },
+    { x: 577, y: 783 },
+  { x: 463, y: 462 },
+  { x: 463, y: 512 },
+  { x: 470, y: 544 },
+  { x: 535, y: 466 },
+  { x: 535, y: 538 },
+  { x: 378, y: 469 },
+  { x: 382, y: 451 },
+  { x: 387, y: 515 },
+  { x: 396, y: 479 },
+  { x: 404, y: 517 },
+  { x: 412, y: 489 },
+  { x: 428, y: 481 },
+  { x: 439, y: 508 },
+  { x: 465, y: 618 },
+  { x: 472, y: 621 },
+  { x: 476, y: 391 },
+  { x: 480, y: 603 },
+  { x: 483, y: 624 },
+  { x: 485, y: 415 },
+  { x: 489, y: 552 },
+  { x: 491, y: 398 },
+  { x: 494, y: 415 },
+  { x: 508, y: 435 },
+  { x: 508, y: 568 },
+  { x: 510, y: 601 },
+  { x: 517, y: 390 },
+  { x: 517, y: 418 },
+  { x: 521, y: 551 },
+  { x: 524, y: 397 },
+  { x: 530, y: 434 },
+  { x: 535, y: 594 },
+  { x: 537, y: 594 },
+  { x: 539, y: 419 },
+  { x: 547, y: 596 },
+  { x: 564, y: 479 },
+  { x: 564, y: 531 },
+  { x: 579, y: 525 },
+  { x: 596, y: 545 },
+  { x: 599, y: 507 },
+  { x: 599, y: 528 },
+  { x: 600, y: 485 },
+  { x: 601, y: 528 },
+  { x: 602, y: 485 },
+  { x: 617, y: 474 },
+  { x: 302, y: 401 },
+  { x: 304, y: 394 },
+  { x: 307, y: 608 },
+  { x: 308, y: 585 },
+  { x: 324, y: 599 },
+  { x: 324, y: 390 },
+  { x: 325, y: 424 },
+  { x: 327, y: 592 },
+  { x: 336, y: 570 },
+  { x: 338, y: 555 },
+  { x: 338, y: 566 },
+  { x: 338, y: 380 },
+  { x: 339, y: 435 },
+  { x: 340, y: 566 },
+  { x: 352, y: 607 },
+  { x: 359, y: 388 },
+  { x: 362, y: 385 },
+  { x: 369, y: 432 },
+  { x: 372, y: 442 },
+  { x: 372, y: 568 },
+  { x: 377, y: 368 },
+  { x: 382, y: 345 },
+  { x: 397, y: 367 },
+  { x: 396, y: 691 },
+  { x: 408, y: 688 },
+  { x: 410, y: 679 },
+  { x: 410, y: 686 },
+  { x: 412, y: 342 },
+  { x: 414, y: 679 },
+  { x: 418, y: 373 },
+  { x: 422, y: 301 },
+  { x: 424, y: 628 },
+  { x: 426, y: 309 },
+  { x: 430, y: 695 },
+  { x: 432, y: 651 },
+  { x: 434, y: 301 },
+  { x: 439, y: 635 },
+  { x: 439, y: 638 },
+  { x: 441, y: 349 },
+  { x: 544, y: 319 },
+  { x: 552, y: 319 },
+  { x: 553, y: 632 },
+  { x: 560, y: 661 },
+  { x: 566, y: 307 },
+  { x: 567, y: 623 },
+  { x: 570, y: 633 },
+  { x: 573, y: 696 },
+  { x: 577, y: 313 },
+  { x: 578, y: 340 },
+  { x: 579, y: 320 },
+  { x: 579, y: 370 },
+  { x: 590, y: 303 },
+  { x: 601, y: 334 },
+  { x: 603, y: 659 },
+  { x: 620, y: 679 },
+  { x: 621, y: 347 },
+  { x: 623, y: 361 },
+  { x: 624, y: 697 },
+  { x: 628, y: 431 },
+  { x: 634, y: 615 },
+  { x: 637, y: 388 },
+  { x: 639, y: 388 },
+  { x: 646, y: 416 },
+  { x: 653, y: 441 },
+  { x: 661, y: 445 },
+  { x: 666, y: 577 },
+  { x: 670, y: 570 },
+  { x: 677, y: 574 },
+  { x: 679, y: 428 },
+  { x: 679, y: 428 },
+  { x: 682, y: 612 },
+  { x: 685, y: 611 },
+  { x: 685, y: 595 },
+  { x: 686, y: 387 },
+  { x: 686, y: 596 },
+  { x: 686, y: 691 },
+  { x: 687, y: 571 },
+  { x: 687, y: 611 },
+  { x: 688, y: 581 },
+  { x: 689, y: 439 },
+  { x: 689, y: 287 },
+  { x: 232, y: 502 },
+  { x: 233, y: 543 },
+  { x: 234, y: 407 },
+  { x: 234, y: 545 },
+  { x: 237, y: 361 },
+  { x: 238, y: 518 },
+  { x: 239, y: 639 },
+  { x: 240, y: 633 },
+  { x: 243, y: 632 },
+  { x: 244, y: 632 },
+  { x: 245, y: 741 },
+  { x: 246, y: 632 },
+  { x: 250, y: 518 },
+  { x: 254, y: 679 },
+  { x: 254, y: 680 },
+  { x: 257, y: 725 },
+  { x: 262, y: 324 },
+  { x: 262, y: 536 },
+  { x: 265, y: 312 },
+  { x: 265, y: 646 },
+  { x: 267, y: 688 },
+  { x: 267, y: 290 },
+  { x: 267, y: 741 },
+  { x: 268, y: 284 },
+  { x: 269, y: 324 },
+  { x: 270, y: 302 },
+  { x: 272, y: 289 },
+  { x: 274, y: 318 },
+  { x: 275, y: 359 },
+  { x: 278, y: 290 },
+  { x: 281, y: 332 },
+  { x: 283, y: 507 },
+  { x: 284, y: 533 },
+  { x: 287, y: 329 },
+  { x: 287, y: 368 },
+  { x: 288, y: 639 },
+  { x: 290, y: 660 },
+  { x: 291, y: 324 },
+  { x: 296, y: 649 },
+  { x: 297, y: 370 },
+  { x: 298, y: 532 },
+  { x: 311, y: 280 },
+  { x: 311, y: 709 },
+  { x: 318, y: 751 },
+  { x: 319, y: 270 },
+  { x: 320, y: 641 },
+  { x: 322, y: 747 },
+  { x: 324, y: 741 },
+  { x: 325, y: 321 },
+  { x: 329, y: 753 },
+  { x: 332, y: 730 },
+  { x: 334, y: 618 },
+  { x: 336, y: 250 },
+  { x: 340, y: 533 },
+  { x: 342, y: 423 },
+  { x: 348, y: 281 },
+  { x: 350, y: 353 },
+  { x: 352, y: 252 },
+  { x: 353, y: 321 },
+  { x: 354, y: 318 },
+  { x: 356, y: 752 },
+  { x: 356, y: 376 },
+  { x: 357, y: 370 },
+  { x: 358, y: 359 },
+  { x: 362, y: 278 },
+  { x: 373, y: 733 },
+  { x: 374, y: 275 },
+  { x: 376, y: 275 },
+  { x: 377, y: 328 },
+  { x: 379, y: 276 },
+  { x: 380, y: 258 },
+  { x: 382, y: 350 },
+  { x: 383, y: 720 },
+  { x: 384, y: 268 },
+  { x: 387, y: 340 },
+  { x: 450, y: 182 },
+  { x: 450, y: 280 },
+  { x: 452, y: 264 },
+  { x: 459, y: 267 },
+  { x: 467, y: 757 },
+  { x: 472, y: 722 },
+  { x: 474, y: 292 },
+  { x: 479, y: 278 },
+  { x: 488, y: 283 },
+  { x: 495, y: 707 },
+  { x: 524, y: 722 },
+  { x: 533, y: 229 },
+  { x: 541, y: 245 },
+  { x: 541, y: 269 },
+  { x: 546, y: 253 },
+  { x: 547, y: 741 },
+  { x: 547, y: 739 },
+  { x: 547, y: 764 },
+  { x: 564, y: 255 },
+  { x: 631, y: 761 },
+  { x: 635, y: 292 },
+  { x: 636, y: 269 },
+  { x: 646, y: 290 },
+  { x: 651, y: 727 },
+  { x: 660, y: 729 },
+  { x: 664, y: 743 },
+  { x: 666, y: 286 },
+  { x: 666, y: 743 },
+  { x: 667, y: 258 },
+  { x: 667, y: 709 },
+  { x: 667, y: 741 },
+  { x: 669, y: 258 },
+  { x: 669, y: 709 },
+  { x: 670, y: 740 },
+  { x: 671, y: 767 },
+  { x: 682, y: 239 },
+  { x: 689, y: 277 },
+  { x: 695, y: 275 },
+  { x: 701, y: 462 },
+  { x: 706, y: 487 },
+  { x: 709, y: 459 },
+  { x: 709, y: 651 },
+  { x: 710, y: 667 },
+  { x: 715, y: 455 },
+  { x: 717, y: 636 },
+  { x: 718, y: 536 },
+  { x: 719, y: 350 },
+  { x: 720, y: 546 },
+  { x: 723, y: 681 },
+  { x: 727, y: 342 },
+  { x: 737, y: 372 },
+  { x: 737, y: 628 },
+  { x: 739, y: 372 },
+  { x: 742, y: 638 },
+  { x: 744, y: 163 },
+  { x: 748, y: 495 },
+  { x: 753, y: 163 },
+  { x: 753, y: 326 },
+  { x: 753, y: 670 },
+  { x: 758, y: 303 },
+  { x: 761, y: 325 },
+  { x: 762, y: 540 },
+  { x: 763, y: 325 },
+  { x: 766, y: 371 },
+  { x: 767, y: 311 },
+  { x: 769, y: 354 },
+  { x: 770, y: 328 },
+  { x: 771, y: 354 },
+  { x: 773, y: 506 },
+  { x: 774, y: 197 },
+  { x: 109, y: 582 },
+  { x: 152, y: 431 },
+  { x: 157, y: 291 },
+  { x: 162, y: 596 },
+  { x: 162, y: 777 },
+  { x: 163, y: 742 },
+  { x: 167, y: 594 },
+  { x: 170, y: 231 },
+  { x: 171, y: 414 },
+  { x: 171, y: 273 },
+  { x: 178, y: 445 },
+  { x: 185, y: 619 },
+  { x: 189, y: 582 },
+  { x: 196, y: 445 },
+  { x: 197, y: 389 },
+  { x: 198, y: 238 },
+  { x: 199, y: 265 },
+  { x: 200, y: 556 },
+  { x: 201, y: 389 },
+  { x: 202, y: 701 },
+  { x: 204, y: 755 },
+  { x: 205, y: 709 },
+  { x: 213, y: 424 },
+  { x: 216, y: 247 },
+  { x: 216, y: 265 },
+  { x: 216, y: 717 },
+  { x: 218, y: 399 },
+  { x: 218, y: 717 },
+  { x: 220, y: 397 },
+  { x: 220, y: 423 },
+  { x: 222, y: 399 },
+  { x: 226, y: 846 },
+  { x: 234, y: 218 },
+  { x: 250, y: 844 },
+  { x: 250, y: 884 },
+  { x: 255, y: 224 },
+  { x: 260, y: 777 },
+  { x: 267, y: 290 },
+  { x: 267, y: 741 },
+  { x: 281, y: 839 },
+  { x: 287, y: 807 },
+  { x: 393, y: 168 },
+  { x: 394, y: 778 },
+  { x: 395, y: 203 },
+  { x: 399, y: 825 },
+  { x: 407, y: 199 },
+  { x: 414, y: 845 },
+  { x: 420, y: 180 },
+  { x: 425, y: 805 },
+  { x: 428, y: 207 },
+  { x: 435, y: 180 },
+  { x: 436, y: 808 },
+  { x: 443, y: 778 },
+  { x: 448, y: 842 },
+  { x: 553, y: 165 },
+  { x: 557, y: 188 },
+  { x: 564, y: 206 },
+  { x: 577, y: 783 },
+  { x: 579, y: 192 },
+  { x: 582, y: 222 },
+  { x: 595, y: 222 },
+  { x: 597, y: 190 },
+  { x: 608, y: 173 },
+  { x: 608, y: 203 },
+  { x: 613, y: 175 },
+  { x: 703, y: 793 },
+  { x: 706, y: 217 },
+  { x: 742, y: 163 },
+  { x: 769, y: 211 },
+  { x: 773, y: 181 },
+  { x: 773, y: 197 },
+  { x: 773, y: 506 },
+  { x: 775, y: 561 },
+  { x: 777, y: 717 },
+  { x: 782, y: 376 },
+  { x: 785, y: 624 },
+  { x: 790, y: 411 },
+  { x: 793, y: 715 },
+  { x: 804, y: 378 },
+  { x: 804, y: 583 },
+  { x: 804, y: 612 },
+  { x: 807, y: 576 },
+  { x: 812, y: 569 },
+  { x: 815, y: 288 },
+  { x: 816, y: 616 },
+  { x: 822, y: 552 },
+  { x: 831, y: 701 },
+  { x: 835, y: 248 },
+  { x: 835, y: 601 },
+  { x: 841, y: 718 },
+  { x: 847, y: 748 },
+  { x: 78, y: 205 },
+  { x: 83, y: 480 },
+  { x: 87, y: 170 },
+  { x: 91, y: 457 },
+  { x: 93, y: 457 },
+  { x: 93, y: 458 },
+  { x: 97, y: 690 },
+  { x: 99, y: 300 },
+  { x: 100, y: 302 },
+  { x: 102, y: 367 },
+  { x: 105, y: 456 },
+  { x: 106, y: 697 },
+  { x: 109, y: 305 },
+  { x: 109, y: 318 },
+  { x: 111, y: 357 },
+  { x: 121, y: 685 },
+  { x: 122, y: 695 },
+  { x: 123, y: 348 },
+  { x: 124, y: 678 },
+  { x: 132, y: 324 },
+  { x: 140, y: 208 },
+  { x: 141, y: 373 },
+  { x: 144, y: 538 },
+  { x: 145, y: 202 },
+  { x: 146, y: 207 },
+  { x: 146, y: 802 },
+  { x: 147, y: 675 },
+  { x: 147, y: 950 },
+  { x: 168, y: 88 },
+  { x: 168, y: 112 },
+  { x: 173, y: 123 },
+  { x: 176, y: 141 },
+  { x: 180, y: 873 },
+  { x: 184, y: 102 },
+  { x: 202, y: 856 },
+  { x: 208, y: 142 },
+  { x: 219, y: 108 },
+  { x: 220, y: 105 },
+  { x: 222, y: 916 },
+  { x: 300, y: 893 },
+  { x: 313, y: 111 },
+  { x: 317, y: 917 },
+  { x: 327, y: 128 },
+  { x: 327, y: 908 },
+  { x: 334, y: 122 },
+  { x: 351, y: 850 },
+  { x: 353, y: 917 },
+  { x: 355, y: 906 },
+  { x: 361, y: 891 },
+  { x: 364, y: 890 },
+  { x: 365, y: 83 },
+  { x: 365, y: 901 },
+  { x: 373, y: 855 },
+  { x: 384, y: 847 },
+  { x: 452, y: 872 },
+  { x: 474, y: 916 },
+  { x: 476, y: 901 },
+  { x: 484, y: 93 },
+  { x: 493, y: 78 },
+  { x: 500, y: 121 },
+  { x: 505, y: 130 },
+  { x: 505, y: 918 },
+  { x: 516, y: 121 },
+  { x: 519, y: 138 },
+  { x: 524, y: 876 },
+  { x: 530, y: 904 },
+  { x: 539, y: 113 },
+  { x: 539, y: 889 },
+  { x: 547, y: 864 },
+  { x: 633, y: 147 },
+  { x: 636, y: 141 },
+  { x: 638, y: 140 },
+  { x: 641, y: 89 },
+  { x: 666, y: 101 },
+  { x: 671, y: 139 },
+  { x: 673, y: 76 },
+  { x: 680, y: 104 },
+  { x: 687, y: 81 },
+  { x: 692, y: 861 },
+  { x: 703, y: 793 },
+  { x: 778, y: 905 },
+  { x: 779, y: 891 },
+  { x: 782, y: 872 },
+  { x: 785, y: 147 },
+  { x: 787, y: 903 },
+  { x: 788, y: 891 },
+  { x: 790, y: 117 },
+  { x: 795, y: 123 },
+  { x: 799, y: 144 },
+  { x: 803, y: 864 },
+  { x: 804, y: 137 },
+  { x: 811, y: 860 },
+  { x: 814, y: 871 },
+  { x: 821, y: 904 },
+  { x: 835, y: 601 },
+  { x: 845, y: 889 },
+  { x: 857, y: 319 },
+  { x: 864, y: 890 },
+  { x: 867, y: 360 },
+  { x: 869, y: 322 },
+  { x: 882, y: 697 },
+  { x: 888, y: 176 },
+  { x: 888, y: 784 },
+  { x: 900, y: 664 },
+  { x: 903, y: 353 },
+  { x: 904, y: 317 },
+  { x: 907, y: 369 },
+  { x: 908, y: 326 },
+  { x: 917, y: 842 },
+  { x: 919, y: 835 },
+  { x: 922, y: 815 },
+  { x: 1, y: 601 },
+  { x: 2, y: 593 },
+  { x: 3, y: 859 },
+  { x: 5, y: 608 },
+  { x: 8, y: 917 },
+  { x: 9, y: 858 },
+  { x: 11, y: 423 },
+  { x: 11, y: 81 },
+  { x: 13, y: 567 },
+  { x: 18, y: 440 },
+  { x: 19, y: 562 },
+  { x: 20, y: 916 },
+  { x: 22, y: 733 },
+  { x: 25, y: 391 },
+  { x: 25, y: 414 },
+  { x: 25, y: 554 },
+  { x: 29, y: 582 },
+  { x: 31, y: 139 },
+  { x: 31, y: 386 },
+  { x: 32, y: 908 },
+  { x: 33, y: 555 },
+  { x: 34, y: 118 },
+  { x: 35, y: 761 },
+  { x: 36, y: 417 },
+  { x: 41, y: 748 },
+  { x: 41, y: 755 },
+  { x: 42, y: 850 },
+  { x: 43, y: 889 },
+  { x: 45, y: 397 },
+  { x: 47, y: 443 },
+  { x: 47, y: 432 },
+  { x: 47, y: 83 },
+  { x: 52, y: 560 },
+  { x: 55, y: 939 },
+  { x: 56, y: 125 },
+  { x: 57, y: 100 },
+  { x: 58, y: 767 },
+  { x: 59, y: 382 },
+  { x: 61, y: 420 },
+  { x: 63, y: 600 },
+  { x: 65, y: 717 },
+  { x: 66, y: 391 },
+  { x: 66, y: 612 },
+  { x: 68, y: 601 },
+  { x: 68, y: 90 },
+  { x: 68, y: 707 },
+  { x: 69, y: 574 },
+  { x: 69, y: 760 },
+  { x: 70, y: 90 },
+  { x: 73, y: 129 },
+  { x: 74, y: 142 },
+  { x: 78, y: 965 },
+  { x: 81, y: 11 },
+  { x: 83, y: 46 },
+  { x: 84, y: 28 },
+  { x: 85, y: 998 },
+  { x: 101, y: 998 },
+  { x: 102, y: 925 },
+  { x: 103, y: 957 },
+  { x: 105, y: 999 },
+  { x: 114, y: 926 },
+  { x: 116, y: 15 },
+  { x: 118, y: 17 },
+  { x: 118, y: 952 },
+  { x: 122, y: 942 },
+  { x: 127, y: 942 },
+  { x: 130, y: 5 },
+  { x: 133, y: 66 },
+  { x: 135, y: 931 },
+  { x: 136, y: 998 },
+  { x: 139, y: 964 },
+  { x: 140, y: 208 },
+  { x: 145, y: 202 },
+  { x: 145, y: 964 },
+  { x: 148, y: 952 },
+  { x: 228, y: 49 },
+  { x: 241, y: 56 },
+  { x: 265, y: 992 },
+  { x: 269, y: 53 },
+  { x: 275, y: 59 },
+  { x: 289, y: 54 },
+  { x: 297, y: 69 },
+  { x: 297, y: 985 },
+  { x: 380, y: 983 },
+  { x: 381, y: 969 },
+  { x: 385, y: 941 },
+  { x: 387, y: 939 },
+  { x: 388, y: 11 },
+  { x: 395, y: 944 },
+  { x: 398, y: 60 },
+  { x: 400, y: 976 },
+  { x: 403, y: 15 },
+  { x: 414, y: 975 },
+  { x: 424, y: 957 },
+  { x: 431, y: 3 },
+  { x: 433, y: 978 },
+  { x: 437, y: 11 },
+  { x: 437, y: 43 },
+  { x: 438, y: 996 },
+  { x: 439, y: 931 },
+  { x: 440, y: 4 },
+  { x: 456, y: 29 },
+  { x: 495, y: 78 },
+  { x: 521, y: 95 },
+  { x: 522, y: 872 },
+  { x: 555, y: 939 },
+  { x: 556, y: 59 },
+  { x: 574, y: 71 },
+  { x: 576, y: 959 },
+  { x: 579, y: 1 },
+  { x: 579, y: 984 },
+  { x: 589, y: 978 },
+  { x: 595, y: 984 },
+  { x: 597, y: 57 },
+  { x: 597, y: 948 },
+  { x: 599, y: 932 },
+  { x: 601, y: 990 },
+  { x: 603, y: 10 },
+  { x: 603, y: 37 },
+  { x: 605, y: 10 },
+  { x: 616, y: 24 },
+  { x: 621, y: 949 },
+  { x: 621, y: 995 },
+  { x: 703, y: 51 },
+  { x: 707, y: 63 },
+  { x: 707, y: 974 },
+  { x: 708, y: 65 },
+  { x: 711, y: 961 },
+  { x: 712, y: 953 },
+  { x: 722, y: 985 },
+  { x: 724, y: 939 },
+  { x: 725, y: 61 },
+  { x: 730, y: 45 },
+  { x: 739, y: 927 },
+  { x: 740, y: 970 },
+  { x: 741, y: 947 },
+  { x: 745, y: 960 },
+  { x: 757, y: 928 },
+  { x: 758, y: 998 },
+  { x: 765, y: 13 },
+  { x: 769, y: 37 },
+  { x: 769, y: 50 },
+  { x: 770, y: 986 },
+  { x: 771, y: 2 },
+  { x: 779, y: 891 },
+  { x: 788, y: 891 },
+  { x: 796, y: 892 },
+  { x: 804, y: 137 },
+  { x: 809, y: 91 },
+  { x: 854, y: 959 },
+  { x: 857, y: 319 },
+  { x: 858, y: 941 },
+  { x: 859, y: 936 },
+  { x: 864, y: 890 },
+  { x: 868, y: 972 },
+  { x: 869, y: 322 },
+  { x: 869, y: 931 },
+  { x: 871, y: 945 },
+  { x: 876, y: 938 },
+  { x: 880, y: 931 },
+  { x: 885, y: 62 },
+  { x: 886, y: 926 },
+  { x: 893, y: 952 },
+  { x: 902, y: 942 },
+  { x: 903, y: 353 },
+  { x: 904, y: 991 },
+  { x: 908, y: 326 },
+  { x: 908, y: 957 },
+  { x: 910, y: 19 },
+  { x: 910, y: 957 },
+  { x: 914, y: 32 },
+  { x: 915, y: 72 },
+  { x: 917, y: 22 },
+  { x: 922, y: 28 },
+  { x: 922, y: 42 },
+  { x: 922, y: 815 },
+  { x: 923, y: 984 },
+  { x: 927, y: 289 },
+  { x: 927, y: 81 },
+  { x: 930, y: 774 },
+  { x: 933, y: 271 },
+  { x: 934, y: 257 },
+  { x: 937, y: 245 },
+  { x: 939, y: 96 },
+  { x: 941, y: 296 },
+  { x: 948, y: 763 },
+  { x: 950, y: 131 },
+  { x: 955, y: 244 },
+  { x: 958, y: 770 },
+  { x: 961, y: 763 },
+  { x: 963, y: 256 },
+  { x: 972, y: 248 },
+  { x: 993, y: 144 },
+  { x: 993, y: 281 },
+  { x: 994, y: 272 },
+  { x: 995, y: 251 },
+  { x: 997, y: 120 },
+  { x: 999, y: 121 }
+];
+
+
+
+
+    // Retrieve Confirmed Coordinates from the hidden div
+    let confirmedCoordinates = [];
+    try {
+      confirmedCoordinates = JSON.parse(hiddenConfirmedListDiv.textContent.trim());
+    } catch (e) {
+      console.error("Error parsing confirmed coordinates:", e);
+      confirmedCoordinates = []; // Default to empty list in case of error
+    }
+
+    
+    // Image and Coordinate System Information
+    const coordSystemWidth = 1000;
+    const coordSystemHeight = 1000;
+
+    let scaleX, scaleY;
+    let pointRadius = 5;
+
+
+
+    // Function to redraw the coordinates on the canvas
+function reDrawCoordinates() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
+
+  // Draw all red coordinates
+  coordinates.forEach(coord => {
+    const x = coord.x * scaleX;
+    const y = canvas.height - (coord.y * scaleY); // Flip Y coordinate
+
+    ctx.beginPath();
+    ctx.fillStyle = 'red'; // Red for regular coordinates
+    ctx.arc(x, y, pointRadius, 0, 2 * Math.PI); 
+    ctx.fill();
+  });
+
+  // Draw all green confirmed coordinates
+  confirmedCoordinates.forEach(coord => {
+    const x = coord.x * scaleX;
+    const y = canvas.height - (coord.y * scaleY); // Flip Y coordinate
+
+    ctx.beginPath();
+    ctx.fillStyle = 'green'; // Green for confirmed coordinates
+    ctx.arc(x, y, pointRadius * 2, 0, 2 * Math.PI); // Larger size for green dots
+    ctx.fill();
+  });
+}
+
+    //Function to update the scaling of the drawing
+    function updateCanvasSize() {
+      canvas.width = background.offsetWidth;  // Use offsetWidth for displayed width
+      canvas.height = background.offsetHeight; // Use offsetHeight for displayed height
+      scaleX = canvas.width / coordSystemWidth;
+      scaleY = canvas.height / coordSystemHeight;
+      reDrawCoordinates(); // Redraw points after resizing
+    }
+
+    // Function to populate the coordinate list
+    function populateCoordinateList() {
+      coordinateList.innerHTML = ''; // Clear the existing list
+      confirmedCoordinates.forEach(coord => {
+        const listItem = document.createElement('li');
+        listItem.textContent = `X: ${coord.x}, Y: ${coord.y}`;
+        coordinateList.appendChild(listItem);
+      });
+    }
+
+    // Initial size and redraw
+    background.onload = () => {
+        updateCanvasSize();
+        populateCoordinateList();
+        reDrawCoordinates();
+    }
+
+    //Size on resize and redraw
+    window.addEventListener('resize', () => {
+      updateCanvasSize();
+      reDrawCoordinates();
+    });
+
+    // Mousemove event listener for hover effect
+    canvas.addEventListener('mousemove', function(event) {
+      const mouseX = event.offsetX;
+      const mouseY = event.offsetY;
+
+      let hoveredCoord = null;
+
+      // Find if the mouse is over any coordinate in confirmed coords
+      for (let i = 0; i < confirmedCoordinates.length; i++) {
+        const coord = confirmedCoordinates[i];
+        const x = coord.x * scaleX;
+        const y = canvas.height - (coord.y * scaleY);
+
+        const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+
+        if (distance <= pointRadius * 2) {  // Larger radius because it's a green dot
+          hoveredCoord = coord;
+          break; // Stop the loop if a coordinate is found
+        }
+      }
+
+      // If no confirmed coords are hovered, check the regular coordinates
+      if (!hoveredCoord) {
+        for (let i = 0; i < coordinates.length; i++) {
+          const coord = coordinates[i];
+          const x = coord.x * scaleX;
+          const y = canvas.height - (coord.y * scaleY);
+
+          const distance = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+
+          if (distance <= pointRadius) {
+            hoveredCoord = coord;
+            break; // Stop the loop if a coordinate is found
+          }
+        }
+      }
+
+      if (hoveredCoord) {
+        // Show tooltip near the mouse
+        tooltip.style.left = mouseX + 10 + 'px';
+        tooltip.style.top = mouseY + 10 + 'px';
+        tooltip.textContent = `X: ${hoveredCoord.x}, Y: ${hoveredCoord.y}`;
+        tooltip.style.display = 'block';
+      } else {
+        // Hide the tooltip
+        tooltip.style.display = 'none';
+      }
+    });
+
+    // Image Loading
+    background.src = "MAP_S2.jpg"; // Replace with your image path
+
+  </script>
+
+</body>
+</html>
+
